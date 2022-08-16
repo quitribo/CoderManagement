@@ -1,31 +1,31 @@
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const { sendResponse, AppError } = require("./helpers/utils.js");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+
+const indexRouter = require("./routes/index");
 const mongoose = require("mongoose");
+// require("dotenv/config");
 
 require("dotenv").config();
+const cors = require("cors");
 
-// Connect to MONGODB
-mongoose.connect(process.env.MONGODB_URI, () => {
-  console.log("Connected to Database!");
-});
+const app = express();
 
-var indexRouter = require("./routes/index");
-// var tasksRouter = require("./routes/task.api");
-// var usersRouter = require("./routes/user.api");
-
-var app = express();
-
+app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Connect to MONGODB
+mongoose.connect(process.env.MONGODB_URI, () => {
+  console.log("Connected to Database!");
+});
+
 app.use("/", indexRouter);
-// app.use("/users", usersRouter);
-// app.use("/tasks", tasksRouter);
 
 // catch 404 and forard to error handler
 app.use((req, res, next) => {
@@ -45,5 +45,4 @@ app.use((err, req, res, next) => {
     err.isOperational ? err.errorType : "Internal Server Error"
   );
 });
-
 module.exports = app;
